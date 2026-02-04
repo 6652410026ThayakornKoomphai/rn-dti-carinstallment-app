@@ -1,5 +1,7 @@
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -23,6 +25,40 @@ export default function Input() {
   const [carMonth, setCarMonth] = useState("");
   const [carInterest, setCarInterest] = useState("");
   const [carInstallment, setCarInstallment] = useState("");
+
+  const handleCalculateInstallment = () => {
+    //Validate
+    if (
+      carPrice === "" ||
+      carDownPayment === "" ||
+      carMonth === "" ||
+      carInterest === ""
+    ) {
+      Alert.alert("กรุณากรอกข้อมูลให้ครบ");
+      return;
+    }
+    //คำนวณ
+    //เงินดาวน์
+    let downPayment = (Number(carPrice) * Number(carDownPayment)) / 100;
+    //ยอดจัด
+    let carPayment = Number(carPrice) - downPayment;
+    //คำนวณดอกเบี้ยทั้งหมด
+    let totalInterest =
+      carPayment * (Number(carInterest) / 100) * (Number(carMonth) / 12);
+    //คำนวณยอดผ่อนต่อเดือน
+    let installmentPay = (carPayment + totalInterest) / Number(carMonth);
+
+    //ส่งผลไปแสดงที่หน้า Result
+    router.push({
+      pathname: "/result",
+      params: {
+        downPayment: downPayment.toFixed(2),
+        carPayment: carPayment.toFixed(2),
+        totalInterest: totalInterest.toFixed(2),
+        installmentPay: installmentPay.toFixed(2),
+      },
+    });
+  };
 
   return (
     <KeyboardAvoidingView
@@ -123,7 +159,10 @@ export default function Input() {
           />
 
           {/* ปุ่มคำนวณค่างวด */}
-          <TouchableOpacity style={styles.calculateButton}>
+          <TouchableOpacity
+            style={styles.calculateButton}
+            onPress={handleCalculateInstallment}
+          >
             <Text style={styles.CalButtonText}>คำนวณค่างวดรถ</Text>
           </TouchableOpacity>
         </View>
